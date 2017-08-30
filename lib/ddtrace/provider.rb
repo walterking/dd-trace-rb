@@ -5,12 +5,17 @@ module Datadog
   class DefaultContextProvider
     # Initializes the default context provider with a thread-bound context.
     def initialize
-      @context = Datadog::ThreadLocalContext.new
+      reset
     end
 
     # Return the current context.
     def context
       @context.local
+    end
+
+    # Setup a new context
+    def reset(context = Datadog::ThreadLocalContext.new)
+      @context = context
     end
   end
 end

@@ -305,6 +305,10 @@ module Datadog
       @writer.write(trace, @services)
     end
 
+    def ensure_clean_state
+      @provider.reset
+    end
+
     private :write, :guess_context_and_parent
   end
 end

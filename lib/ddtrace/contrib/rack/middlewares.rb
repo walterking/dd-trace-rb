@@ -40,7 +40,7 @@ module Datadog
 
         def configure
           # ensure that the configuration is executed only once
-          return if @tracer && @service
+          return @tracer.ensure_clean_state if @tracer && @service
 
           # retrieve the current tracer and service
           @tracer = @options.fetch(:tracer)
