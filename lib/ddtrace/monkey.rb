@@ -43,6 +43,8 @@ module Datadog
     end
 
     def patch_module(m)
+      return unless Datadog.tracer.enabled
+
       @mutex.synchronize do
         patcher = @patchers[m]
         raise "Unsupported module #{m}" unless patcher

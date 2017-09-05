@@ -60,6 +60,8 @@ module Datadog
           datadog_config = DEFAULT_CONFIG.merge(user_config)
           datadog_config[:tracer].enabled = datadog_config[:enabled]
 
+          return unless datadog_config[:enabled]
+
           # set debug logging
           Datadog::Tracer.debug_logging = datadog_config[:debug]
 

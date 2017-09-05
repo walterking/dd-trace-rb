@@ -43,6 +43,10 @@ if defined?(Rails::VERSION)
           options = {}
           config.after_initialize do |app|
             Datadog::Contrib::Rails::Framework.configure(config: app.config)
+
+            # rubocop:disable Metrics/BlockNesting
+            break unless app.config.datadog_trace.fetch(:enabled)
+
             Datadog::Contrib::Rails::Framework.auto_instrument()
             Datadog::Contrib::Rails::Framework.auto_instrument_redis()
             Datadog::Contrib::Rails::Framework.auto_instrument_grape()
