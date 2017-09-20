@@ -20,7 +20,7 @@ module Datadog
         end
 
         def format_command_args(command_args)
-          cmd = command_args.map { |x| format_arg(x) }.join(' ')
+          cmd = command_args.each { |x| format_arg(x) }.join(' ')
           cmd = cmd[0..(CMD_MAX_LEN - TOO_LONG_MARK.length - 1)] + TOO_LONG_MARK if cmd.length > CMD_MAX_LEN
           cmd
         end
