@@ -94,10 +94,12 @@ module Datadog
       # This check ensures that if a process doesn't own the current +Writer+, async workers
       # will be initialized again (but only once for each process).
       pid = Process.pid
+      Datadog::Tracer.log.debug("///// PID: #{pid}, ////// serv: #{services.inspect},  ///// trace: #{trace.inspect}")
       @mutex_after_fork.synchronize do
         if pid != @pid
           @pid = pid
           # we should start threads because the worker doesn't own this
+          Datadog::Tracer.log.debug("///// GOING TO START!!!")
           start()
         end
       end

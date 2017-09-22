@@ -13,7 +13,7 @@ module Datadog
     attr_reader :traces_endpoint, :services_endpoint
 
     # seconds before the transport timeout
-    TIMEOUT = 1
+    TIMEOUT = 2
 
     # header containing the number of traces in a payload
     TRACE_COUNT_HEADER = 'X-Datadog-Trace-Count'.freeze
@@ -73,11 +73,14 @@ module Datadog
       request = Net::HTTP::Post.new(url, headers)
       request.body = data
 
-      response = Net::HTTP.start(@hostname, @port, read_timeout: TIMEOUT) { |http| http.request(request) }
+      Datadog::Tracer.log.debug("Before start")
+      response = Net::HTTP.start(@hostname, @port, open_timeout: TIMEOUT, continue_timeout: TIMEOUT, ssl_timeout: TIMEOUT, read_timeout: TIMEOUT) do |http| 
+        http.request(request) 
+      end
       handle_response(response)
-    rescue StandardError => e
-      Datadog::Tracer.log.error(e.message)
-      500
+     rescue => e
+       Datadog::Tracer.log.error(e.message)
+       500
     end
 
     # Downgrade the connection to a compatibility version of the HTTPTransport;
@@ -126,7 +129,10 @@ module Datadog
     # or do something more complex to recover from a possible error. This
     # function is handled within the HTTP mutex.synchronize so it's thread-safe.
     def handle_response(response)
-      status_code = response.code.to_i
+      status_code = 0 
+      if defined?(response.code.to_i)
+        status_code = response.code.to_i
+      end
 
       if success?(status_code)
         Datadog::Tracer.log.debug('Payload correctly sent to the trace agent.')
@@ -139,10 +145,12 @@ module Datadog
       elsif server_error?(status_code)
         Datadog::Tracer.log.error("Server error: #{response.message}")
         @mutex.synchronize { @count_server_error += 1 }
+      else 
+        Datadog::Tracer.log.error("BAD BAD BAD: #{response}")
       end
 
       status_code
-    rescue StandardError => e
+    rescue => e
       Datadog::Tracer.log.error(e.message)
       @mutex.synchronize { @count_internal_error += 1 }
       500

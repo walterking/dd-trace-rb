@@ -18,7 +18,7 @@ module Datadog
     @autopatch_modules = {
       elasticsearch: true,
       http: true,
-      redis: true,
+      redis: false,
       grape: true,
       faraday: true,
       aws: true,
